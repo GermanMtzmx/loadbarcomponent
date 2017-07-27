@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Progressbar Component</title>
+</head>
+<body>
+	<!-- component call -->
+	<progress-bar-loader 
+		data-stop="40"
+		data-time="3"
+		data-wait="1"
+	>
+		
+	</progress-bar-loader>
+
+	<!-- component template -->
+	<template class="template-loader">
+		<style>
+			.loaderContainer {
+				width: 100%;
+				height:6px;
+				position: relative;
+				display: inline-flex; 
+
+			}
+
+			.bar-loader {
+				width:0;
+				display: block;
+				position: absolute;
+				height: 4px;
+				background-color:#e53935;
+				-webkit-box-shadow: 0px 0px 15px 5px rgba(244, 67, 54, .75);
+				-moz-box-shadow: 0px 0px 15px 5px rgba(244, 67, 54, .75);
+				box-shadow: 0px 0px 15px 5px rgba(244, 67, 54, .75);
+				transition: width 1s;
+			    -webkit-transition: width 1s; 				
+			}
+
+			.circleLoader {
+			    width: 15px;
+			    height: 15px;
+			    border-radius: 50%;
+			    float: right;
+				background-color:#e53935;
+			    top: -6px;
+			    position: absolute;
+			    right: 0px;
+				-webkit-box-shadow: 0px 0px 15px 5px rgba(244, 67, 54, .75);
+				-moz-box-shadow: 0px 0px 15px 5px rgba(244, 67, 54, .75);
+				box-shadow: 0px 0px 15px 5px rgba(244, 67, 54, .75); 				
+			}
+		</style>
+
+		<div class="loaderContainer">
+			<span class="bar-loader">
+				<span class="circleLoader"></span>			
+			</span>				
+		</div>
+
+	
+	</template>
+
+	<!-- component core -->
+	<script>
+
+		(() => {
+			'use strict';
+			class ProgressBarComponent extends HTMLElement {
+
+				constructor(){
+					super();
+
+					//loading template to attach shadowdom
+					const template = document.querySelector('template.template-loader');
+					//cloning tpl 
+					const shadowRoot = this.attachShadow({mode:'open'});
+					//adding tpl to shadow root
+					shadowRoot.appendChild(document.importNode(template.content,true));
+					//appending to shadow
+					document.body.appendChild(shadowRoot);
+
+				}
+
+				//setters & getters
+
+				get stopsAt(){
+					return parseInt(this.getAttribute('data-stop'));
+				}
+
+				set stopsAt(val) {
+					
+					if(val) {
+						this.setAttribute('data-stop',val);
+					}else {
+						this.setAttribute('data-stop',100);
+					}
+				}
+
+				get timeExecution() {
+					return parseInt(this.getAttribute('data-time'));
+				}
+
+				set timeExecution(val) {
+					
+					if(val) {
+						this.setAttribute('data-time',parseInt(val));
+					}else {
+						this.setAttribute('data-time',5);
+					}
+
+				}
+
+				get waitingSecs(){
+					return parseInt(this.getAttribute('data-wait'));
+				}
+
+				set waitingSecs(val) {
+					if(val) {
+						this.setAttribute('data-wait',val);
+					} else {
+						this.setAttribute('data-wait',0);
+					}
+				}
+
+				// functionality
+				animate(stopsAt,duration,waitingSecs,bar) {
+
+					const everyTime = (duration*1000)/100;
+					let counter = 0;
+					let element = document.querySelector('.loaderContainer');
+
+					let interval = setInterval(()=>{
+						if (counter === stopsAt){
+							console.log('i should waith here ', waitingSecs, ' secs...');
+							clearInterval(interval);
+							setTimeout(()=>{
+								bar.style.width = 100 + '%';
+								console.log('done .....');
+								setTimeout(()=>document.body.removeChild(element),1100);
+
+							},waitingSecs*1000);
+
+						} else if(counter === 100){
+							console.log('im finished');
+							setTimeout(()=>document.body.removeChild(element),
+								1000);
+							clearInterval(interval);
+						} 
+
+						else {
+							counter++;
+							bar.style.width = counter + '%';
+
+						}
+					},everyTime);
+				}
+
+				connectedCallback() {
+					const mainContainer = document.querySelector('.loaderContainer');
+					const bar = document.body.querySelector('.bar-loader');
+					//doubt hacky things .... ????
+					this.stopsAt = this.stopsAt;
+					this.timeExecution = this.timeExecution;
+					this.waitingSecs = this.waitingSecs;
+					console.log("timeExecution : ",this.timeExecution, " stops at :",this.stopsAt, ' waitingSecs :',this.waitingSecs);
+
+					//animation method is called and begin the show :V
+					this.animate(this.stopsAt,this.timeExecution,this.waitingSecs,bar);
+				}
+
+
+			}
+			customElements.define('progress-bar-loader',ProgressBarComponent);
+		}
+		)(window.customElements);
+		
+	</script>
+
+
+	
+</body>
+</html>
